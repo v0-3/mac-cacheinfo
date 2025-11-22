@@ -10,42 +10,59 @@
 
 # mac-cacheinfo
 
-**mac-cacheinfo** is a lightweight C++ utility for retrieving CPU cache information (L1i, L1d, L2, etc.) on Apple Silicon–based macOS systems.  
-It provides a simple command-line interface that queries system-level parameters using macOS APIs.
-
-If you have questions or would like to discuss the project, feel free to contact me here or on **Discord: `@v0.3`**.
+A lightweight C++23 utility for macOS that retrieves detailed CPU and cache information using the BSD `sysctl` interface.
+Designed for minimal overhead, clean output, and modern C++ coding practices.
 
 ---
 
 ## Features
 
-- Retrieves cache line size  
-- Reports L1 instruction cache size  
-- Reports L1 data cache size  
-- Reports L2 cache size  
-- Supports Apple Silicon processors (e.g., M1, M2, M3 families)
+- Retrieves CPU brand string
+- Reads hardware cache sizes (L1i, L1d, L2)
+- Obtains cache line size
+- Uses safe, modern C++23 techniques (`std::optional`, `std::print`, RAII, strong typing)
+- Clear, human-readable terminal output
+
+---
+
+## Supported Platforms
+
+- macOS (Apple Silicon)
+  Uses `sysctlbyname`, available only on BSD/macOS systems.
 
 ---
 
 ## Build & Run
 
+### Requirements
+- **macOS**
+- **Clang 16+** or **Apple Clang (Xcode 15+)**
+- CMake **(optional)**
+
+### Build with Make
+
 ```bash
-git clone https://github.com/3SUM/mac-cacheinfo.git
-cd mac-cacheinfo/src
+git clone https://github.com/v0-3/mac-cacheinfo.git
+cd mac-cacheinfo
 make
 ./cache
+```
 
+
+### Example Output
+
+```
 Apple M3 Pro CPU Info
 ====================================
-        Cache Line Size:      128  B
-        L1i  Cache Size:  131.072 KB
-        L1d  Cache Size:   65.536 KB
-        L2   Cache Size: 4194.304 KB
+    Cache Line Size:       128  B
+    L1i  Cache Size:        64 KiB
+    L1d  Cache Size:        64 KiB
+    L2   Cache Size:       4096 KiB
 ```
 
 ---
 
 ## License
 
-© [Luis Maya Aranda](https://github.com/v0-3). All rights reserved.  
+© [Luis Maya Aranda](https://github.com/v0-3). All rights reserved.
 Licensed under the **MIT License**.
