@@ -63,5 +63,5 @@ Apple M3 Pro CPU Info
 
 ## License
 
-© [Luis Maya Aranda](https://github.com/v0-3). All rights reserved.
+© [Luis Maya Aranda](https://github.com/v0-3). All rights reserved.  
 Licensed under the **MIT License**.
