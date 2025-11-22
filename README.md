@@ -13,7 +13,7 @@
 **mac-cacheinfo** is a lightweight C++ utility for retrieving CPU cache information (L1i, L1d, L2, etc.) on Apple Silicon–based macOS systems.  
 It provides a simple command-line interface that queries system-level parameters using macOS APIs.
 
-If you have questions or would like to discuss the project, feel free to contact me here or on **Discord: `v0.3`**.
+If you have questions or would like to discuss the project, feel free to contact me here or on **Discord: `@v0.3`**.
 
 ---
 
@@ -47,5 +47,5 @@ Apple M3 Pro CPU Info
 
 ## License
 
-© Luis Maya Aranda￼. All rights reserved.
-Licensed under the MIT License.
+© [Luis Maya Aranda](https://github.com/v0-3). All rights reserved.  
+Licensed under the **MIT License**.
