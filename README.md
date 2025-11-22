@@ -37,13 +37,12 @@ Designed for minimal overhead, clean output, and modern C++ coding practices.
 ### Requirements
 - **macOS**
 - **Clang 16+** or **Apple Clang (Xcode 15+)**
-- CMake **(optional)**
 
 ### Build with Make
 
 ```bash
 git clone https://github.com/v0-3/mac-cacheinfo.git
-cd mac-cacheinfo
+cd mac-cacheinfo/src
 make
 ./cache
 ```
