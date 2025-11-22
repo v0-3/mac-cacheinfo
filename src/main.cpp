@@ -1,81 +1,104 @@
 #include <sys/sysctl.h>
 
-#include <cstdint>
+#include <cstdlib>
 #include <optional>
 #include <print>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
-constexpr size_t BUFFER_SIZE = 128;
+using std::size_t;
 
-std::string get_cpu_type() {
-    char buffer[BUFFER_SIZE];
-    size_t size = sizeof(buffer);
-
-    if (sysctlbyname("machdep.cpu.brand_string", &buffer, &size, nullptr, 0) < 0) {
-        throw std::runtime_error("Unable to retrieve CPU Type");
+[[nodiscard]] std::string get_cpu_type() {
+    // First call: query required buffer size
+    size_t size{};
+    if (sysctlbyname("machdep.cpu.brand_string", nullptr, &size, nullptr, 0) != 0 || size == 0) {
+        throw std::runtime_error("Unable to retrieve CPU type (size query failed)");
     }
 
-    return std::string(buffer);
+    // Second call: actually retrieve the string
+    std::string buffer(size, '\0');
+    if (sysctlbyname("machdep.cpu.brand_string", buffer.data(), &size, nullptr, 0) != 0) {
+        throw std::runtime_error("Unable to retrieve CPU type (value query failed)");
+    }
+
+    // sysctl typically returns a null-terminated string; trim trailing '\0' if present
+    if (!buffer.empty() && buffer.back() == '\0') {
+        buffer.pop_back();
+    }
+
+    return buffer;
 }
 
-std::optional<size_t> get_sysctl_value(const char *name) {
-    size_t value = 0;
-    size_t size = sizeof(value);
+template <typename T>
+[[nodiscard]] std::optional<T> get_sysctl_value(std::string_view name) {
+    static_assert(std::is_trivially_copyable_v<T>,
+                  "get_sysctl_value requires a trivially copyable type");
 
-    if (sysctlbyname(name, &value, &size, nullptr, 0) < 0) {
+    T value{};
+    size_t size = sizeof(T);
+
+    if (sysctlbyname(name.data(), &value, &size, nullptr, 0) != 0 || size != sizeof(T)) {
         return std::nullopt;
     }
 
     return value;
 }
 
-size_t get_cachelinesize() {
-    if (auto value = get_sysctl_value("hw.cachelinesize"); value) {
+template <typename T>
+[[nodiscard]] T get_required_sysctl(std::string_view name, std::string_view error_message) {
+    if (auto value = get_sysctl_value<T>(name)) {
         return *value;
     }
 
-    throw std::runtime_error("Unable to retreive Cache Line Size");
+    throw std::runtime_error(std::string{error_message});
 }
 
-size_t get_l1icachesize() {
-    if (auto value = get_sysctl_value("hw.l1icachesize"); value) {
-        return *value;
-    }
-
-    throw std::runtime_error("Unable to retreive L1i Cache Size");
+[[nodiscard]] size_t get_cache_line_size() {
+    return get_required_sysctl<size_t>("hw.cachelinesize",
+                                       "Unable to retrieve cache line size");
 }
 
-size_t get_l1dcachesize() {
-    if (auto value = get_sysctl_value("hw.l1dcachesize"); value) {
-        return *value;
-    }
-
-    throw std::runtime_error("Unable to retrieve L1d Cache Size");
+[[nodiscard]] size_t get_l1i_cache_size() {
+    return get_required_sysctl<size_t>("hw.l1icachesize",
+                                       "Unable to retrieve L1i cache size");
 }
 
-size_t get_l2cachesize() {
-    if (auto value = get_sysctl_value("hw.l2cachesize"); value) {
-        return *value;
-    }
-
-    throw std::runtime_error("Unable to retrieve L2 Cache Size");
+[[nodiscard]] size_t get_l1d_cache_size() {
+    return get_required_sysctl<size_t>("hw.l1dcachesize",
+                                       "Unable to retrieve L1d cache size");
 }
 
-int main(int argc, char *argv[]) {
+[[nodiscard]] size_t get_l2_cache_size() {
+    return get_required_sysctl<size_t>("hw.l2cachesize",
+                                       "Unable to retrieve L2 cache size");
+}
+
+int main(int argc, char* argv[]) {
     if (argc != 1) {
-        std::print("Usage\n\t./cache\n");
+        std::println("Usage:\n\t./cache");
         return EXIT_FAILURE;
     }
 
     try {
-        std::print("{} CPU Info\n{:=>36}\n", get_cpu_type(), '=');
-        std::print("\tCache Line Size: {:>8}  B\n", get_cachelinesize());
-        std::print("\tL1i  Cache Size: {:>8} KB\n", get_l1icachesize() * 1e-3);
-        std::print("\tL1d  Cache Size: {:>8} KB\n", get_l1dcachesize() * 1e-3);
-        std::print("\tL2   Cache Size: {:>8} KB\n", get_l2cachesize() * 1e-3);
-    } catch (const std::exception &e) {
-        std::print("[ERROR] {}\n", e.what());
+        const auto cpu_type        = get_cpu_type();
+        const auto cache_line_size = get_cache_line_size();
+        const auto l1i_size_bytes  = get_l1i_cache_size();
+        const auto l1d_size_bytes  = get_l1d_cache_size();
+        const auto l2_size_bytes   = get_l2_cache_size();
+
+        constexpr double bytes_per_kibibyte = 1024.0;
+
+        std::println("{} CPU Info\n{:=>36}", cpu_type, '=');
+        std::println("\tCache Line Size: {:>8}  B", cache_line_size);
+        std::println("\tL1i  Cache Size: {:>8.0f} KiB",
+                     l1i_size_bytes / bytes_per_kibibyte);
+        std::println("\tL1d  Cache Size: {:>8.0f} KiB",
+                     l1d_size_bytes / bytes_per_kibibyte);
+        std::println("\tL2   Cache Size: {:>8.0f} KiB",
+                     l2_size_bytes / bytes_per_kibibyte);
+    } catch (const std::exception& e) {
+        std::println("[ERROR] {}", e.what());
         return EXIT_FAILURE;
     }
 
