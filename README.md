@@ -1,16 +1,31 @@
 <br>
 
 <p align="center">
-<a href="https://github.com/3SUM"><img width="200" src="logo/cache.png" alt="cache logo"></a>
+  <a href="https://github.com/v0-3">
+    <img width="200" src="logo/cache.png" alt="cache logo">
+  </a>
 </p>
 
 <br>
 
 # mac-cacheinfo
 
-C++ program to retrieve the CPU Cache Sizes of Mac devices.
+**mac-cacheinfo** is a lightweight C++ utility for retrieving CPU cache information (L1i, L1d, L2, etc.) on Apple Silicon–based macOS systems.  
+It provides a simple command-line interface that queries system-level parameters using macOS APIs.
 
-If you have questions or concerns please feel free to contact me here or on **Discord @v0.3**
+If you have questions or would like to discuss the project, feel free to contact me here or on **Discord: `v0.3`**.
+
+---
+
+## Features
+
+- Retrieves cache line size  
+- Reports L1 instruction cache size  
+- Reports L1 data cache size  
+- Reports L2 cache size  
+- Supports Apple Silicon processors (e.g., M1, M2, M3 families)
+
+---
 
 ## Build & Run
 
@@ -19,13 +34,7 @@ git clone https://github.com/3SUM/mac-cacheinfo.git
 cd mac-cacheinfo/src
 make
 ./cache
-```
 
-## Example Output
-
-2023 M3 MacBook Pro Cache Info
-
-```md
 Apple M3 Pro CPU Info
 ====================================
         Cache Line Size:      128  B
@@ -34,8 +43,9 @@ Apple M3 Pro CPU Info
         L2   Cache Size: 4194.304 KB
 ```
 
+---
+
 ## License
 
-&copy; [Luis Maya Aranda](https://github.com/3SUM). All rights reserved.
-
+© Luis Maya Aranda￼. All rights reserved.
 Licensed under the MIT License.
